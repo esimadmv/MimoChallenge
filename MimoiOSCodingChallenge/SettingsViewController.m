@@ -376,7 +376,6 @@ static const CGFloat kSettingsSectionFooterHeight               = 48.0;
     else {
         cell.contentView.backgroundColor = [UIColor whiteColor];
     }
-    cell.contentView.backgroundColor = [UIColor whiteColor];
     cell.activityIndicator.hidden = YES;
 
 	cell.secondaryLabel.hidden = YES;
@@ -414,7 +413,12 @@ static const CGFloat kSettingsSectionFooterHeight               = 48.0;
             cell.label.hidden = YES;
         }
     } else {
-        cell.label.textColor = [UIColor grayColor];
+        if (darkMode) {
+            cell.label.textColor = [UIColor whiteColor];
+        }
+        else {
+            cell.label.textColor = [UIColor grayColor];
+        }
         cell.label.hidden = NO;
     }
 }
