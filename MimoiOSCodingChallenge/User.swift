@@ -34,5 +34,38 @@ class User {
     }
     
     
+    func initialize(json object: AnyObject,email:String) throws {
+        guard let _ = parseUserJSON(json: object,email: email) else {
+            throw NSError.init()
+        }
+    }
+    
+    func parseUserJSON(json object: AnyObject,email:String) -> User? {
+        
+        guard let dict = object as? Dictionary<String, AnyObject> else {
+            return nil
+        }
+        guard let id = dict["id_token"] as? String,
+            let accessToken = dict["access_token"] as? String else {
+            return nil
+        }
+        self.initialize(id: id, access: accessToken,email:email)
+        return User.user
+    }
+    
+    
+    func storeUserData() {
+        let userDefaults = UserDefaults.standard
+        userDefaults.set(emailaddress!, forKey: "email")
+        userDefaults.set(id!, forKey: "id")
+        userDefaults.set(accessToken!, forKey: "accesstoken")
+        userDefaults.synchronize()
+    }
+
+    
+    
+    
+
+    
     
 }
