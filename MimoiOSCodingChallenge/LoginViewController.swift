@@ -35,7 +35,7 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
     override func viewDidAppear(_ animated: Bool) {
         // handle current user
         if (User.currentUser() != nil){
-            // go to SettingsViewController
+            onSuccess()
         }
     }
     
@@ -142,7 +142,7 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
                     if responseObj.statusCode >= 200 && responseObj.statusCode <= 299 {
                         do {
                             try User.user.initialize(json: json as AnyObject,email:email)
-                            // go to SettingsViewController
+                            self.onSuccess()
                         } catch let error {
                             self.showAlert(title: json["error"] as! String, message: error.localizedDescription)
                         }
@@ -219,7 +219,7 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
     
     
     func onSuccess(){
-        let vc = SettingsTableViewCell.init()
+        let vc:SettingsViewController = SettingsViewController.init()
         self.present(vc, animated: true, completion: nil)
     }
 
