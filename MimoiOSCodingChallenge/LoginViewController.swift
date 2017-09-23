@@ -12,7 +12,7 @@ import Alamofire
 class LoginViewController: UIViewController,UITextFieldDelegate {
 
     var welcome = UITextView()
-    var isLoginView:Bool = true // set true for login and false for sign up
+    var isLoginView:Bool = false // set true for login and false for sign up
     
     var emailTextField = UITextField()
     var passTextField = UITextField()
@@ -124,7 +124,7 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
         let url = urlOrigin + "/dbconnections/signup"
         
         let parameters = ["client_id": "PAn11swGbMAVXVDbSCpnITx5Utsxz1co",
-                          "username": email,
+                          "email": email,
                           "password": password,
                           "connection": "Username-Password-Authentication",
                           "grant_type": "password",
@@ -134,6 +134,9 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
         Alamofire.request(url, method: .post, parameters: parameters).responseJSON { response in
             if let json = response.result.value as? [String:AnyObject] {
                 if let responseObj = response.response {
+                    print(json)
+                    print("\n\n")
+                    print(responseObj)
                     if responseObj.statusCode >= 200 && responseObj.statusCode <= 299 {
                         self.signinUser(email: email, password: password)
                     }
