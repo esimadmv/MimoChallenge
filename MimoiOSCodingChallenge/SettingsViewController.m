@@ -584,6 +584,11 @@ static const CGFloat kSettingsSectionFooterHeight               = 48.0;
 - (void)confirmLogout {
 
     // destroy session
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"email"];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"id"];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"accessToken"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    [self dismissViewControllerAnimated:NO completion:nil];
 }
 - (void)restoreWithCell:(SettingsTableViewCell *)cell {
     if (self.restoreInProgress == NO) {
