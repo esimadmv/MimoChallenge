@@ -8,6 +8,7 @@
 
 import UIKit
 
+
 class LoginViewController: UIViewController,UITextFieldDelegate {
 
     var welcome = UITextView()
@@ -33,6 +34,9 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
     
     override func viewDidAppear(_ animated: Bool) {
         // handle current user
+        if (User.currentUser() != nil){
+            // go to SettingsViewController
+        }
     }
     
     func setupView(){
@@ -96,6 +100,7 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
         button.isEnabled = false
         Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(disableLogin), userInfo: nil, repeats: false)
         // handle login
+        
     }
     
     
