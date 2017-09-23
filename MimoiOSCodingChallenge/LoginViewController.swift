@@ -138,7 +138,14 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
         // CAll AUTH API to Login User
         Alamofire.request(url, method: .post, parameters: parameters).responseJSON { response in
             if let json = response.result.value as? [String:AnyObject] {
-                
+                if let responseObj = response.response {
+                    if responseObj.statusCode >= 200 && responseObj.statusCode <= 299 {
+                        
+                    }
+                    else {
+                        self.showAlert(title: json["error"] as! String, message: json["error_description"] as! String)
+                    }
+                }
             }
         }
     }
