@@ -121,7 +121,7 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
     
     func signupUser(email:String,password:String){
         // Call API
-        let url = urlOrigin + "/oauth/ro"
+        let url = urlOrigin + "/dbconnections/signup"
         
         let parameters = ["client_id": "PAn11swGbMAVXVDbSCpnITx5Utsxz1co",
                           "username": email,
@@ -135,12 +135,7 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
             if let json = response.result.value as? [String:AnyObject] {
                 if let responseObj = response.response {
                     if responseObj.statusCode >= 200 && responseObj.statusCode <= 299 {
-                        do {
-                            try User.user.initialize(json: json as AnyObject,email:email)
-                            self.onSuccess()
-                        } catch let error {
-                            self.showAlert(title: json["error"] as! String, message: error.localizedDescription)
-                        }
+                        self.signinUser(email: email, password: password)
                     }
                     else {
                         self.showAlert(title: json["error"] as! String, message: json["error_description"] as! String)
