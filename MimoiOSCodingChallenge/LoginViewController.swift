@@ -228,8 +228,6 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
     }
 
     
-
-    
     func showAlert(title: String, message: String){
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)

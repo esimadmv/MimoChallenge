@@ -21,6 +21,7 @@ class User {
         self.id = id
         self.accessToken = access
         self.emailaddress = email
+        storeUserData()
     }
     
     class func currentUser() -> User? {
