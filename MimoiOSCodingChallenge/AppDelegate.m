@@ -5,7 +5,7 @@
 
 #import "AppDelegate.h"
 #import "SettingsViewController.h"
-#import "MimoiOSCodingChallenge-Swift.h"
+#import "LoginViewController.h"
 
 @interface AppDelegate ()
 

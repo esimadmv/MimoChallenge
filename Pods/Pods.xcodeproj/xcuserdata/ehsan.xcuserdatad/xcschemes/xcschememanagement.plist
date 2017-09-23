@@ -4,11 +4,6 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>Alamofire.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>Pods-MimoiOSCodingChallenge.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -37,17 +32,12 @@
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>56B2E7F375099A2D8C4657DB3540A72E</key>
+		<key>46677CE7E4B15E35A3C195756301272B</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>79C040AFDDCE1BCBF6D8B5EB0B85887F</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>E04FAAC807BFFB0C182B6DF441B33F50</key>
+		<key>DBDB5AF79CF41CDCA9A8B93A64EF7D49</key>
 		<dict>
 			<key>primary</key>
 			<true/>
