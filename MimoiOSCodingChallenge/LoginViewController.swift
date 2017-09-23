@@ -140,7 +140,12 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
             if let json = response.result.value as? [String:AnyObject] {
                 if let responseObj = response.response {
                     if responseObj.statusCode >= 200 && responseObj.statusCode <= 299 {
-                        
+                        do {
+                            try User.user.initialize(json: json as AnyObject,email:email)
+                            // go to SettingsViewController
+                        } catch let error {
+                            self.showAlert(title: json["error"] as! String, message: error.localizedDescription)
+                        }
                     }
                     else {
                         self.showAlert(title: json["error"] as! String, message: json["error_description"] as! String)
@@ -210,6 +215,12 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
         let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
         alertController.addAction(defaultAction)
         self.present(alertController, animated: true, completion: nil)
+    }
+    
+    
+    func onSuccess(){
+        let vc = SettingsTableViewCell.init()
+        self.present(vc, animated: true, completion: nil)
     }
 
 
