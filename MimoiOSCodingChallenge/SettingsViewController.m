@@ -102,7 +102,14 @@ static const CGFloat kSettingsSectionFooterHeight               = 48.0;
     self.alreadyShownAlert = NO;
     self.restoreInProgress = NO;
 	self.userSubscribed = NO;
-	[self.tableView reloadData];
+    
+    [self checkDarkMode];
+	
+}
+
+-(void)checkDarkMode {
+    
+    [self.tableView reloadData];
 }
 
 
@@ -585,6 +592,7 @@ static const CGFloat kSettingsSectionFooterHeight               = 48.0;
 
     // destroy session
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"email"];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"darkMode"];
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"id"];
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"accessToken"];
     [[NSUserDefaults standardUserDefaults] synchronize];
