@@ -13,11 +13,11 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
 
     var welcome = UITextView()
     var isLoginView:Bool = true // set true for login and false for sign up
+    
     var emailTextField = UITextField()
     var passTextField = UITextField()
     let button = UIButton()
-    let label = UILabel()
-    var alreadyExist = false
+    let urlOrigin = "https://mimo-test.auth0.com"
     let clr_mimo = UIColor(red: 0, green: 200/255, blue: 96/255, alpha: 1)
     
     override func viewDidLoad() {
@@ -121,12 +121,38 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
     
     func signupUser(email:String,password:String){
         // Call API
+        let url = urlOrigin + "/oauth/ro"
         
+        let parameters = ["client_id": "PAn11swGbMAVXVDbSCpnITx5Utsxz1co",
+                          "username": email,
+                          "password": password,
+                          "connection": "Username-Password-Authentication",
+                          "grant_type": "password",
+                          "scope": "openid profile email"]
+        
+        // CAll AUTH API to Login User
+        Alamofire.request(url, method: .post, parameters: parameters).responseJSON { response in
+            if let json = response.result.value as? [String:AnyObject] {
+                if let responseObj = response.response {
+                    if responseObj.statusCode >= 200 && responseObj.statusCode <= 299 {
+                        do {
+                            try User.user.initialize(json: json as AnyObject,email:email)
+                            self.onSuccess()
+                        } catch let error {
+                            self.showAlert(title: json["error"] as! String, message: error.localizedDescription)
+                        }
+                    }
+                    else {
+                        self.showAlert(title: json["error"] as! String, message: json["error_description"] as! String)
+                    }
+                }
+            }
+        }
     }
     
     func signinUser(email:String,password:String){
         // Call API
-        let url = "https://mimo-test.auth0.com/oauth/ro"
+        let url = urlOrigin + "/oauth/ro"
         
         let parameters = ["client_id": "PAn11swGbMAVXVDbSCpnITx5Utsxz1co",
                           "username": email,
@@ -205,9 +231,8 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
     func disableLogin() {
         button.isEnabled = true
     }
-    func disableReset() {
-        label.isEnabled = true
-    }
+
+    
 
     
     func showAlert(title: String, message: String){
