@@ -555,8 +555,36 @@ static const CGFloat kSettingsSectionFooterHeight               = 48.0;
 
 - (void)logout {
 
+    UIAlertController * alert = [UIAlertController
+                                 alertControllerWithTitle:@"Are You Sure Want to Logout?"
+                                 message:@""
+                                 preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* yesButton = [UIAlertAction
+                                actionWithTitle:@"Yes"
+                                style:UIAlertActionStyleDefault
+                                handler:^(UIAlertAction * action) {
+                                    [self confirmLogout];
+                                }];
+    
+    UIAlertAction* noButton = [UIAlertAction
+                               actionWithTitle:@"Cancel"
+                               style:UIAlertActionStyleDefault
+                               handler:^(UIAlertAction * action) {
+                                   
+                               }];
+    
+    [alert addAction:yesButton];
+    [alert addAction:noButton];
+    
+    [self presentViewController:alert animated:YES completion:nil];
+    
 }
 
+- (void)confirmLogout {
+
+    // destroy session
+}
 - (void)restoreWithCell:(SettingsTableViewCell *)cell {
     if (self.restoreInProgress == NO) {
         cell.activityIndicator.hidden = NO;
