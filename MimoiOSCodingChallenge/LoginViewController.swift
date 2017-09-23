@@ -12,7 +12,7 @@ import Alamofire
 class LoginViewController: UIViewController,UITextFieldDelegate {
 
     var welcome = UITextView()
-    var isLoginView:Bool = false // set true for login and false for sign up
+    var isLoginView:Bool = true // set true for login and false for sign up
     
     var emailTextField = UITextField()
     var passTextField = UITextField()
@@ -134,14 +134,11 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
         Alamofire.request(url, method: .post, parameters: parameters).responseJSON { response in
             if let json = response.result.value as? [String:AnyObject] {
                 if let responseObj = response.response {
-                    print(json)
-                    print("\n\n")
-                    print(responseObj)
                     if responseObj.statusCode >= 200 && responseObj.statusCode <= 299 {
                         self.signinUser(email: email, password: password)
                     }
                     else {
-                        self.showAlert(title: json["error"] as! String, message: json["error_description"] as! String)
+                        self.showAlert(title: json["code"] as! String, message: json["description"] as! String)
                     }
                 }
             }
