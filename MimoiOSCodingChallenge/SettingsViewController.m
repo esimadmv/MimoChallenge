@@ -369,7 +369,13 @@ static const CGFloat kSettingsSectionFooterHeight               = 48.0;
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)configureCell forRowAtIndexPath:(NSIndexPath *)indexPath {
     SettingsTableViewCell *cell = (SettingsTableViewCell *)configureCell;
-    
+    BOOL darkMode = [[NSUserDefaults standardUserDefaults] boolForKey:@"darkMode"];
+    if (darkMode) {
+        cell.contentView.backgroundColor = [UIColor darkGrayColor];
+    }
+    else {
+        cell.contentView.backgroundColor = [UIColor whiteColor];
+    }
     cell.contentView.backgroundColor = [UIColor whiteColor];
     cell.activityIndicator.hidden = YES;
 
@@ -380,9 +386,7 @@ static const CGFloat kSettingsSectionFooterHeight               = 48.0;
 		if (indexPath.row == SettingsTableSectionNotificationRowSwitch) {
 			cell.selectionStyle = UITableViewCellSelectionStyleNone;
 			cell.selectionSwitch.hidden = NO;
-			BOOL switchOn = NO;
-			
-			[cell.selectionSwitch setOn:switchOn animated:NO];
+			[cell.selectionSwitch setOn:darkMode animated:NO];
 			cell.delegate = self;
 		} else if (indexPath.row == SettingsTableSectionNotificationRowTime) {
 			cell.secondaryLabel.hidden = NO;
