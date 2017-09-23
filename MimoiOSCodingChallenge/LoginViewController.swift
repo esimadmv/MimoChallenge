@@ -121,10 +121,26 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
     
     func signupUser(email:String,password:String){
         // Call API
+        
     }
     
     func signinUser(email:String,password:String){
         // Call API
+        let url = "https://mimo-test.auth0.com/oauth/ro"
+        
+        let parameters = ["client_id": "PAn11swGbMAVXVDbSCpnITx5Utsxz1co",
+                          "username": email,
+                          "password": password,
+                          "connection": "Username-Password-Authentication",
+                          "grant_type": "password",
+                          "scope": "openid profile email"]
+        
+        // CAll AUTH API to Login User
+        Alamofire.request(url, method: .post, parameters: parameters).responseJSON { response in
+            if let json = response.result.value as? [String:AnyObject] {
+                
+            }
+        }
     }
     
     fileprivate func addTextField(y: CGFloat,labelText: String) -> UITextField {
