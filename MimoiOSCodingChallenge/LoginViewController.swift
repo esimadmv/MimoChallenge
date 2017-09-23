@@ -7,7 +7,7 @@
 //
 
 import UIKit
-
+import Alamofire
 
 class LoginViewController: UIViewController,UITextFieldDelegate {
 
@@ -100,7 +100,11 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
         button.isEnabled = false
         Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(disableLogin), userInfo: nil, repeats: false)
         // handle login
-        
+        if emailTextField.text == "" || passTextField.text == "" {
+            showAlert(title: "Empty Field!", message: "You should fill both username and password fields, please try again!")
+        } else {
+            signinUser(email: emailTextField.text!, password: passTextField.text!)
+        }
     }
     
     
@@ -108,9 +112,20 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
         button.isEnabled = false
         Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(disableLogin), userInfo: nil, repeats: false)
         // handle signup
+        if emailTextField.text == "" || passTextField.text == "" {
+            showAlert(title: "Empty Field!", message: "You should fill both username and password fields, please try again!")
+        } else {
+            signupUser(email: emailTextField.text!, password: passTextField.text!)
+        }
     }
     
+    func signupUser(email:String,password:String){
+        // Call API
+    }
     
+    func signinUser(email:String,password:String){
+        // Call API
+    }
     
     fileprivate func addTextField(y: CGFloat,labelText: String) -> UITextField {
         let textField = UITextField(frame: CGRect(x: 30, y: y, width: view.bounds.width - 60, height: 40))
@@ -164,6 +179,14 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
     }
     func disableReset() {
         label.isEnabled = true
+    }
+
+    
+    func showAlert(title: String, message: String){
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let defaultAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
+        alertController.addAction(defaultAction)
+        self.present(alertController, animated: true, completion: nil)
     }
 
 
