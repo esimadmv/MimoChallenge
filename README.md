@@ -37,3 +37,4 @@ Use `openid profile email` for the `scope` parameter
     - Log out should bring you back to the authentication view controller.
     - If you're brave enough, also display the Gravatar picture associated with the email address instead of the default image.
     - If the user isn't logged in or the JWT is expired, show an error message instead of the SettingsViewController.
+# MimoChallengeObjc
