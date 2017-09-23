@@ -108,7 +108,15 @@ static const CGFloat kSettingsSectionFooterHeight               = 48.0;
 }
 
 -(void)checkDarkMode {
-    
+    BOOL darkMode = [[NSUserDefaults standardUserDefaults] boolForKey:@"darkMode"];
+    if (darkMode){
+        self.tableView.separatorColor = [UIColor whiteColor];
+        self.tableView.backgroundColor = [UIColor darkGrayColor];
+        
+    } else {
+        self.tableView.separatorColor = [UIColor grayColor];
+        self.tableView.backgroundColor = [UIColor whiteColor];
+    }
     [self.tableView reloadData];
 }
 
