@@ -111,7 +111,6 @@ class LoginViewController: UIViewController,UITextFieldDelegate {
     @objc fileprivate func signupPressed(_: UIButton) {
         button.isEnabled = false
         Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(disableLogin), userInfo: nil, repeats: false)
-        // handle signup
         if emailTextField.text == "" || passTextField.text == "" {
             showAlert(title: "Empty Field!", message: "You should fill both username and password fields, please try again!")
         } else {
