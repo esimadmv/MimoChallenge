@@ -9,7 +9,6 @@
 #import "LoginViewController.h"
 #import "SettingsViewController.h"
 
-static const Boolean isLoginView  = YES;
 
 @interface LoginViewController ()
 
@@ -19,6 +18,8 @@ static const Boolean isLoginView  = YES;
 @property (strong, nonatomic) UITextView *welcome;
 @property UIColor *mimoColor;
 @property NSString *urlOrigin;
+@property Boolean isLoginView;
+@property Boolean completed;
 
 @end
 
@@ -26,14 +27,13 @@ static const Boolean isLoginView  = YES;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    _isLoginView = YES; // set YES for login and NO for sign up
     _urlOrigin = @"https://mimo-test.auth0.com";
     self.view.backgroundColor = [UIColor whiteColor];
     _mimoColor = [UIColor colorWithRed:0.0f/255.0f
                                  green:200.0f/255.0f
                                   blue:96.0f/255.0f
                                  alpha:1.0f];
-    
-    
     
     [self setupLogin];
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self
@@ -43,6 +43,16 @@ static const Boolean isLoginView  = YES;
     
 }
 
+
+- (void)viewDidAppear:(BOOL)animated{
+    NSString *email = [[NSUserDefaults standardUserDefaults] stringForKey:@"email"];
+    NSString *idToken = [[NSUserDefaults standardUserDefaults] stringForKey:@"id"];
+    NSString *accessToken = [[NSUserDefaults standardUserDefaults] stringForKey:@"accessToken"];
+    if(email != nil && idToken != nil && accessToken != nil){
+        SettingsViewController *vc = [[SettingsViewController alloc] init];
+        [self presentViewController:vc animated:YES completion:nil];
+    }
+}
 
 - (void)setupLogin {
     CGFloat height = 300;
@@ -91,16 +101,16 @@ static const Boolean isLoginView  = YES;
     
     height -= 74;
     UIButton *login = [UIButton buttonWithType:UIButtonTypeCustom];
-    if (isLoginView) {
+    if (_isLoginView) {
         [login addTarget:self
                   action:@selector(signinClicked:)
         forControlEvents:UIControlEventTouchUpInside];
         [login setTitle:NSLocalizedString(@"Login", @"Login Button Title") forState:UIControlStateNormal];
     } else  {
         [login addTarget:self
-              action:@selector(signinClicked:)
+              action:@selector(signupClicked:)
         forControlEvents:UIControlEventTouchUpInside];
-        [login setTitle:NSLocalizedString(@"Login", @"Login Button Title") forState:UIControlStateNormal];
+        [login setTitle:NSLocalizedString(@"Sign Up", @"Login Button Title") forState:UIControlStateNormal];
     }
     login.backgroundColor = _mimoColor;
     [login setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal ];
@@ -122,9 +132,90 @@ static const Boolean isLoginView  = YES;
     [_container addSubview:textField];
 }
 
+-(void) signupClicked:(UIButton*)sender {
+
+    NSString *email = _emailField.text;
+    NSString *pass = _passwordField.text;
+    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
+        //Background Thread
+        NSString *url = [NSString stringWithFormat:@"%@/dbconnections/signup",_urlOrigin];
+        NSMutableURLRequest *urlRequest = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
+        [urlRequest setHTTPMethod:@"POST"];
+        [urlRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+        
+        NSString *postData = [NSString stringWithFormat:@"&client_id=%s&username=%@&password=%@&connection=%s&grant_type=%s&scope=%s", "PAn11swGbMAVXVDbSCpnITx5Utsxz1co", email, pass,"Username-Password-Authentication","password","openid profile email"]; //Send the POST Values
+        NSLog(@"%@", postData);
+        NSString *length = [NSString stringWithFormat:@"%d", [postData length]];
+        [urlRequest setValue:length forHTTPHeaderField:@"Content-Length"];
+        
+        
+        NSDictionary *tmp = [[NSDictionary alloc] initWithObjectsAndKeys:
+                             @"PAn11swGbMAVXVDbSCpnITx5Utsxz1co", @"client_id",
+                             email, @"email",
+                             pass, @"password",
+                             @"Username-Password-Authentication", @"connection",
+                             @"password", @"grant_type",
+                             @"openid profile email", @"scope",
+                             nil];
+        NSError *error;
+        NSData *postdata = [NSJSONSerialization dataWithJSONObject:tmp options:0 error:&error];
+        [urlRequest setHTTPBody:postdata];
+        
+        NSData *returnData = [[NSData alloc]init];
+        
+        returnData = [NSURLConnection sendSynchronousRequest: urlRequest returningResponse: nil error: nil];
+        
+        //Get the Result of Request
+        NSString *response = [[NSString alloc] initWithBytes:[returnData bytes] length:[returnData length] encoding:NSUTF8StringEncoding];
+        
+        NSLog(@"Response >>>> %@",response);
+        NSData *data = [response dataUsingEncoding:NSUTF8StringEncoding];
+        id json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+        
+        if([json objectForKey:@"error"])
+        {
+            _completed = NO;
+            NSLog(@"Error%@",json);
+        }
+        else
+        {
+            _completed = YES;
+            
+        }
+
+        dispatch_async(dispatch_get_main_queue(), ^(void){
+            if (_completed){
+                [self loginInBackground];
+            } else {
+                UIAlertController * alert = [UIAlertController
+                                             alertControllerWithTitle:@"Error"
+                                             message:@"user already exist"
+                                             preferredStyle:UIAlertControllerStyleAlert];
+                
+                UIAlertAction* yesButton = [UIAlertAction
+                                            actionWithTitle:@"Ok"
+                                            style:UIAlertActionStyleDefault
+                                            handler:^(UIAlertAction * action) {
+                                                //Handle your yes please button action here
+                                            }];
+                
+                [alert addAction:yesButton];
+                [self presentViewController:alert animated:YES completion:nil];
+            }
+
+        });
+    });
+    
+}
+
 
 -(void) signinClicked:(UIButton*)sender
 {
+    [self loginInBackground];
+    
+}
+
+-(void) loginInBackground {
     NSString *email = _emailField.text;
     NSString *pass = _passwordField.text;
     dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
@@ -151,38 +242,61 @@ static const Boolean isLoginView  = YES;
         NSError *error;
         NSData *postdata = [NSJSONSerialization dataWithJSONObject:tmp options:0 error:&error];
         [urlRequest setHTTPBody:postdata];
+        NSData *returnData = [[NSData alloc]init];
         
-        NSURLSession *session = [NSURLSession sharedSession];
-        NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:urlRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-            if(httpResponse.statusCode == 200)
-            {
-                NSError *parseError = nil;
-                NSDictionary *responseDictionary = [NSJSONSerialization JSONObjectWithData:data options:0 error:&parseError];
-                NSLog(@"The response is - %@",responseDictionary);
-                NSString *accessToken = [responseDictionary objectForKey:@"access_token"];
-                NSString *idToken = [responseDictionary objectForKey:@"id_token"];
-                [[NSUserDefaults standardUserDefaults] setObject:accessToken forKey:@"accessToken"];
-                [[NSUserDefaults standardUserDefaults] setObject:idToken forKey:@"id"];
-                [[NSUserDefaults standardUserDefaults] setObject:email forKey:@"email"];
-                [[NSUserDefaults standardUserDefaults] synchronize];
-                
-            }
-            else
-            {
-                NSLog(@"Error%@",httpResponse);
-            }
-        }];
-        [dataTask resume];
+        returnData = [NSURLConnection sendSynchronousRequest: urlRequest returningResponse: nil error: nil];
+        
+        //Get the Result of Request
+        NSString *response = [[NSString alloc] initWithBytes:[returnData bytes] length:[returnData length] encoding:NSUTF8StringEncoding];
+        
+        NSLog(@"Response >>>> %@",response);
+        NSData *data = [response dataUsingEncoding:NSUTF8StringEncoding];
+        id json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+        
+        if([json objectForKey:@"error"])
+        {
+            _completed = NO;
+            NSLog(@"Error%@",json);
+        }
+        else
+        {
+            NSLog(@"The response is - %@",json);
+            NSString *accessToken = [json objectForKey:@"access_token"];
+            NSString *idToken = [json objectForKey:@"id_token"];
+            [[NSUserDefaults standardUserDefaults] setObject:accessToken forKey:@"accessToken"];
+            [[NSUserDefaults standardUserDefaults] setObject:idToken forKey:@"id"];
+            [[NSUserDefaults standardUserDefaults] setObject:email forKey:@"email"];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+            _completed = YES;
+            
+            
+        }
+        
         dispatch_async(dispatch_get_main_queue(), ^(void){
-
-            _passwordField.text = @"";
-            _emailField.text = @"";
-            SettingsViewController *vc = [[SettingsViewController alloc] init];
-            [self presentViewController:vc animated:YES completion:nil];
+            
+            if (_completed){
+                _passwordField.text = @"";
+                _emailField.text = @"";
+                SettingsViewController *vc = [[SettingsViewController alloc] init];
+                [self presentViewController:vc animated:YES completion:nil];
+            } else {
+                UIAlertController * alert = [UIAlertController
+                                             alertControllerWithTitle:@"Error"
+                                             message:@"wrong username / password"
+                                             preferredStyle:UIAlertControllerStyleAlert];
+                
+                UIAlertAction* yesButton = [UIAlertAction
+                                            actionWithTitle:@"Ok"
+                                            style:UIAlertActionStyleDefault
+                                            handler:^(UIAlertAction * action) {
+                                                //Handle your yes please button action here
+                                            }];
+                
+                [alert addAction:yesButton];
+                [self presentViewController:alert animated:YES completion:nil];
+            }
         });
     });
-    
 }
 
 
