@@ -7,6 +7,9 @@
 //
 
 #import "LoginViewController.h"
+#import "SettingsViewController.h"
+
+static const Boolean isLoginView  = YES;
 
 @interface LoginViewController ()
 
@@ -14,8 +17,8 @@
 @property (strong, nonatomic) UITextField *emailField;
 @property (strong, nonatomic) UITextField *passwordField;
 @property (strong, nonatomic) UITextView *welcome;
-@property Boolean *isLoginView;
 @property UIColor *mimoColor;
+@property NSString *urlOrigin;
 
 @end
 
@@ -23,6 +26,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    _urlOrigin = @"https://mimo-test.auth0.com";
     self.view.backgroundColor = [UIColor whiteColor];
     _mimoColor = [UIColor colorWithRed:0.0f/255.0f
                                  green:200.0f/255.0f
@@ -87,12 +91,19 @@
     
     height -= 74;
     UIButton *login = [UIButton buttonWithType:UIButtonTypeCustom];
-    [login addTarget:self
-              action:@selector(signupClicked:)
-    forControlEvents:UIControlEventTouchUpInside];
+    if (isLoginView) {
+        [login addTarget:self
+                  action:@selector(signinClicked:)
+        forControlEvents:UIControlEventTouchUpInside];
+        [login setTitle:NSLocalizedString(@"Login", @"Login Button Title") forState:UIControlStateNormal];
+    } else  {
+        [login addTarget:self
+              action:@selector(signinClicked:)
+        forControlEvents:UIControlEventTouchUpInside];
+        [login setTitle:NSLocalizedString(@"Login", @"Login Button Title") forState:UIControlStateNormal];
+    }
     login.backgroundColor = _mimoColor;
     [login setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal ];
-    [login setTitle:NSLocalizedString(@"Login", @"Login Button Title") forState:UIControlStateNormal];
     login.layer.cornerRadius = 5;
     login.clipsToBounds = YES;
     login.frame = CGRectMake(60, _container.bounds.size.height - height, _container.bounds.size.width - 120, 44);
@@ -112,19 +123,63 @@
 }
 
 
--(void) signupClicked:(UIButton*)sender
+-(void) signinClicked:(UIButton*)sender
 {
     NSString *email = _emailField.text;
     NSString *pass = _passwordField.text;
     dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void){
         //Background Thread
-        if (_isLoginView) {
+        NSString *url = [NSString stringWithFormat:@"%@/oauth/ro",_urlOrigin];
+        NSMutableURLRequest *urlRequest = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
+        [urlRequest setHTTPMethod:@"POST"];
+        [urlRequest setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
         
-        } else {
+        NSString *postData = [NSString stringWithFormat:@"&client_id=%s&username=%@&password=%@&connection=%s&grant_type=%s&scope=%s", "PAn11swGbMAVXVDbSCpnITx5Utsxz1co", email, pass,"Username-Password-Authentication","password","openid profile email"]; //Send the POST Values
+        NSLog(@"%@", postData);
+        NSString *length = [NSString stringWithFormat:@"%d", [postData length]];
+        [urlRequest setValue:length forHTTPHeaderField:@"Content-Length"];
         
-        }
+        
+        NSDictionary *tmp = [[NSDictionary alloc] initWithObjectsAndKeys:
+                             @"PAn11swGbMAVXVDbSCpnITx5Utsxz1co", @"client_id",
+                             email, @"username",
+                             pass, @"password",
+                             @"Username-Password-Authentication", @"connection",
+                             @"password", @"grant_type",
+                             @"openid profile email", @"scope",
+                             nil];
+        NSError *error;
+        NSData *postdata = [NSJSONSerialization dataWithJSONObject:tmp options:0 error:&error];
+        [urlRequest setHTTPBody:postdata];
+        
+        NSURLSession *session = [NSURLSession sharedSession];
+        NSURLSessionDataTask *dataTask = [session dataTaskWithRequest:urlRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+            if(httpResponse.statusCode == 200)
+            {
+                NSError *parseError = nil;
+                NSDictionary *responseDictionary = [NSJSONSerialization JSONObjectWithData:data options:0 error:&parseError];
+                NSLog(@"The response is - %@",responseDictionary);
+                NSString *accessToken = [responseDictionary objectForKey:@"access_token"];
+                NSString *idToken = [responseDictionary objectForKey:@"id_token"];
+                [[NSUserDefaults standardUserDefaults] setObject:accessToken forKey:@"accessToken"];
+                [[NSUserDefaults standardUserDefaults] setObject:idToken forKey:@"id"];
+                [[NSUserDefaults standardUserDefaults] setObject:email forKey:@"email"];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                
+            }
+            else
+            {
+                NSLog(@"Error%@",httpResponse);
+            }
+        }];
+        [dataTask resume];
         dispatch_async(dispatch_get_main_queue(), ^(void){
-            //Run UI Updates
+
+            _passwordField.text = @"";
+            _emailField.text = @"";
+            SettingsViewController *vc = [[SettingsViewController alloc] init];
+            [self presentViewController:vc animated:YES completion:nil];
         });
     });
     
